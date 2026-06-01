@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drzewo Genealogiczne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://balkan.app/js/FamilyTree.js"></script>
+    <style>
+        #tree svg { display: inline; }
+        .balkan-graph { font-family: sans-serif !important; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans h-screen flex overflow-hidden">
+
+    <aside class="w-80 bg-white p-5 border-r overflow-y-auto shrink-0 z-10 shadow-lg flex flex-col justify-between">
+        <div>
+            <h2 id="formTitle" class="text-lg font-bold mb-4 text-gray-800">Tryb: Tworzenie nowej osoby</h2>
+            
+            <div class="mb-4">
+                <label class="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1">ID tej osoby:</label>
+                <input type="text" id="visibleId" disabled value="Zostanie nadane po zapisie" class="w-full p-2 border border-gray-200 rounded bg-gray-50 text-gray-700 font-mono text-sm text-center font-bold">
+            </div>
+
+            <form id="personForm" class="space-y-3 text-sm">
+                <input type="hidden" id="personId">
+                
+                <input type="text" id="imie" placeholder="Imię (wymagane)" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="text" id="nazwisko" placeholder="Nazwisko (wymagane)" required class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                
+                <select id="plec" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none">
+                    <option value="male">Mężczyzna</option>
+                    <option value="female">Kobieta</option>
+                </select>
+
+                <input type="text" id="nazwiskoPanienskie" placeholder="Nazwisko panieńskie" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 outline-none hidden">
+
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="dataUrodzenia" placeholder="Data ur. (DD-MM-RRRR)" class="w-full p-2 border rounded text-xs">
+                    <input type="text" id="miejsceUrodzenia" placeholder="Miejsce ur." class="w-full p-2 border rounded text-xs">
+                </div>
+
+                <div class="mt-2 mb-2 bg-gray-50 p-2 rounded border border-gray-200">
+                    <label class="flex items-center gap-2 cursor-pointer mb-2">
+                        <input type="checkbox" id="nieZyje" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-sm text-gray-700 font-medium">Osoba nie żyje</span>
+                    </label>
+                    
+                    <div id="sekcjaZgonu" class="hidden grid grid-cols-2 gap-2">
+                        <input type="text" id="dataZgonu" placeholder="Data zg. (DD-MM-RRRR)" class="w-full p-2 border rounded text-xs bg-white">
+                        <input type="text" id="miejsceZgonu" placeholder="Miejsce zg." class="w-full p-2 border rounded text-xs bg-white">
+                    </div>
+                </div>
+
+                <div class="border-t border-b py-3 my-3">
+                    <label class="text-xs text-blue-600 font-bold mb-2 block uppercase">Powiązania z rodziną</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="text-[10px] text-gray-500 uppercase text-center block mb-1">ID Ojca</label>
+                            <input type="text" id="ojciecId" placeholder="np. 1" class="w-full p-2 border rounded bg-blue-50 text-xs font-mono text-center">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-500 uppercase text-center block mb-1">ID Matki</label>
+                            <input type="text" id="matkaId" placeholder="np. 2" class="w-full p-2 border rounded bg-pink-50 text-xs font-mono text-center">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-500 uppercase text-center block mb-1">Małżonek</label>
+                            <input type="text" id="wspolmalzonekId" placeholder="np. 3" class="w-full p-2 border rounded bg-purple-50 text-xs font-mono text-center" title="Wpisz ID żony lub męża">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">Zapisz do drzewa</button>
+                <button type="button" onclick="resetForm()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 rounded transition font-medium">Anuluj / Dodaj nową osobę</button>
+            </form>
+        </div>
+        
+        <div class="mt-6 pt-4 border-t">
+            <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 rounded transition text-sm">Pobierz kopię JSON</button>
+        </div>
+    </aside>
+
+    <main class="flex-grow relative bg-gray-200">
+        <div id="tree" style="width: 100%; height: 100vh;"></div>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

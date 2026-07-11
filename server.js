@@ -19,7 +19,6 @@ app.get('/api/data', (req, res) => {
     if (!fs.existsSync(DATA_FILE)) {
         return res.json([]);
     }
-    
     try {
         const data = fs.readFileSync(DATA_FILE, 'utf8');
         res.json(JSON.parse(data || '[]'));

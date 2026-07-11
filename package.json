@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
-    "start:test": "cross-env DATA_FILE=test-data.json node server.js"
+    "start:test": "cross-env DATA_FILE=test-data.json node server.js",
+    "test:e2e": "playwright test"
   },
   "keywords": [],
   "author": "",

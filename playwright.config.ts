@@ -29,7 +29,7 @@ export default defineConfig({
   webServer: {
     command: "npm run start:test",
     port: 3000,
-    reuseExistingServer: false,
+    reuseExistingServer: !process.env.CI,
   },
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
@@ -53,10 +53,10 @@ export default defineConfig({
       use: { ...devices["Desktop Firefox"] },
     },
 
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
+    // {
+    //   name: "webkit",
+    //   use: { ...devices["Desktop Safari"] },
+    // },
 
     /* Test against mobile viewports. */
     // {

@@ -24,7 +24,7 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
 
-  globalSetup: require.resolve("./tests/global-setup"),
+  globalSetup: "./tests/global-setup",
 
   webServer: {
     command: "npm run start:test",

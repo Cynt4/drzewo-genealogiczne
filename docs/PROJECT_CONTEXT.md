@@ -20,3 +20,4 @@ Rozwój aplikacji webowej pozwalającej na zarządzanie drzewem genealogicznym, 
 ## Znane ograniczenia
 - Brak bazy danych (dane trzymane w pliku `.json`).
 - Brak pełnoprawnego API w Node.js (w planach).
+- Brak w pełni poprawnego semantycznego HTML w index.html - przez co selektory muszą korzystać z placeholderów i ról.

@@ -1,32 +1,4 @@
-[
-  {
-    "id": "1",
-    "imie": "Jan",
-    "nazwisko": "Testowy",
-    "plec": "male",
-    "nazwiskoPanienskie": "",
-    "dataUrodzenia": "01-01-1990",
-    "miejsceUrodzenia": "Katowice",
-    "nieZyje": false,
-    "dataZgonu": "",
-    "miejsceZgonu": "",
-    "ojciecId": "",
-    "matkaId": "",
-    "wspolmalzonekId": ""
-  },
-  {
-    "id": "2",
-    "imie": "Jan",
-    "nazwisko": "Testowy",
-    "plec": "male",
-    "nazwiskoPanienskie": "",
-    "dataUrodzenia": "01-01-1990",
-    "miejsceUrodzenia": "Katowice",
-    "nieZyje": false,
-    "dataZgonu": "",
-    "miejsceZgonu": "",
-    "ojciecId": "",
-    "matkaId": "",
-    "wspolmalzonekId": ""
-  }
-]
+{
+  "imię": "Format",
+  "nazwisko": "Obiektowy"
+}

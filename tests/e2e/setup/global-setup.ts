@@ -4,7 +4,7 @@ import path from 'path';
 async function globalSetup() {
     const dataDir = path.join(__dirname, '../../../data');
     const source = path.join(dataDir, 'empty-data.json');
-    const destination = path.join(dataDir, 'data/test-data.json');
+    const destination = path.join(dataDir, 'test-data.json');
 
     if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true});

@@ -27,7 +27,8 @@ test.describe("Adding new people to the tree", () => {
 
     page.on("console", (msg) => {
       if (msg.type() === "error") {
-        console.log("❌ BŁĄD KONSOLI PRZEGLĄDARKI:", msg.text());
+        console.log(`❌ BŁĄD KONSOLI: ${msg.text()}`);
+        console.log(`📍 URL Z BŁĘDEM: ${msg.location().url}`);
       }
     });
 
@@ -39,9 +40,17 @@ test.describe("Adding new people to the tree", () => {
     await page.getByPlaceholder("Data ur. (DD-MM-RRRR)").fill("01-01-1990");
     await page.getByPlaceholder("Miejsce ur.").fill("Katowice");
 
-    await page.getByRole("button", { name: "Zapisz do drzewa" }).click();
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        response.url().includes("/api/data") &&
+        response.request().method() === "POST",
+    );
 
-    await expect(page.getByText("Jan")).toBeVisible();
-    await expect(page.getByText("Testowy")).toBeVisible();
+    await page.getByRole("button", { name: "Zapisz do drzewa" }).click();
+    const apiResponse = await responsePromise;
+    expect(apiResponse.status()).toBe(200);
+
+    await expect(page.locator('#tree', { hasText: 'Jan' })).toBeAttached();
+    await expect(page.locator('#tree', { hasText: 'Testowy' })).toBeAttached();
   });
 });

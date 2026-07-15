@@ -60,6 +60,37 @@ for (const person of payload) {
     }
 });
 
+// PUT DATA
+app.put('/api/data/:id', (req, res) => {
+    const id= req.params.id;
+    const updatedPerson = req.body;
+
+    let payload = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]');
+    const index = payload.findIndex(p => String(p.id) === String(id));
+
+    if (index === -1) return res.status(404).json({ error: "Nie znaleziono osoby" });
+
+    if (!updatedPerson.imie || !updatedPerson.nazwisko) {
+        return res.status(422).json({ error: "Wymagane imię i nazwisko" });
+    }
+
+    payload[index] = { ...payload[index], ...updatedPerson, id };
+    fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2));
+    res.json({ success: true});
+});
+
+// DELETE DATA
+app.delete('/api/data/:id', (req, res) => {
+    const id = req.params.id;
+    let payload = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]');
+    const filtered = payload.filter(p => String(p.id) !== String(id));
+
+    if (payload.length === filtered.length) return res.status(404).json({ error: "Nie znaleziono"});
+
+    fs.writeFileSync(DATA_FILE, JSON.stringify(filtered, null, 2));
+    res.json({ success: true });
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Serwer nasłuchuje na bazie danych: data/${TARGET_FILE}`);
 });

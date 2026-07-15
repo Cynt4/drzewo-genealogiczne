@@ -74,4 +74,29 @@ test.describe("API: Zarządzanie strukturą danych drzewa", () => {
       "Każda osoba w drzewie musi posiadać wartość dla wymaganych pól 'imię' i 'nazwisko'.",
     );
   });
+
+  test("PUT - update existing person", async ({ request }) => {
+    await request.post("/api/data", { data: [{ id: "1", imie: "Jan", nazwisko: "Test"}]});
+
+    const response = await request.put("/api/data/1", {
+      data: { imie: "Jan", nazwisko: "Nowak"}
+    });
+
+    expect(response.status()).toBe(200);
+
+    const get = await request.get("/api/data");
+    const data = await get.json();
+    expect(data[0].nazwisko).toBe("Nowak");
+  });
+
+  test("DELETE - remove the person", async ({ request }) => {
+    await request.post("/api.data", { data: [{ id: "1", imie: "Jan", nazwisko: "Test"}]});
+
+    const response = await request.delete("/api/data/1");
+    expect(response.status()).toBe(200);
+
+    const get = await request.get("/api/data");
+    const data = await get.json();
+    expect(data.length).toBe(0);
+  });
 });

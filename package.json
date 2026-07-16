@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "start:test": "cross-env DATA_FILE=test-data.json node server.js",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -20,6 +21,7 @@
     "@playwright/test": "^1.61.1",
     "@types/node": "^26.1.1",
     "cross-env": "^10.1.0",
+    "prettier": "^3.9.5",
     "typescript": "^7.0.2"
   }
 }

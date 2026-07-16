@@ -20,17 +20,14 @@ FamilyTree.templates.ramka_male = Object.assign({}, FamilyTree.templates.ramka);
 FamilyTree.templates.ramka_male.node =
   '<rect x="0" y="0" height="115" width="260" stroke-width="2" rx="8" stroke="#3b82f6" fill="#f8fafc"></rect>';
 
-FamilyTree.templates.ramka_female = Object.assign(
-  {},
-  FamilyTree.templates.ramka,
-);
+FamilyTree.templates.ramka_female = Object.assign({}, FamilyTree.templates.ramka);
 FamilyTree.templates.ramka_female.node =
   '<rect x="0" y="0" height="115" width="260" stroke-width="2" rx="8" stroke="#ec4899" fill="#fdf2f8"></rect>';
 
 async function init() {
-  family = new FamilyTree(document.getElementById("tree"), {
-    mode: "light",
-    template: "ramka",
+  family = new FamilyTree(document.getElementById('tree'), {
+    mode: 'light',
+    template: 'ramka',
     enableSearch: false,
 
     // Zmiana sterowania: Kółko przesuwa (pan), Ctrl+Kółko przybliża (zoom).
@@ -43,71 +40,69 @@ async function init() {
     levelSeparation: 90,
 
     // Wymuszenie sortowania dzieci (od lewej do prawej) wg naszej zmiennej
-    orderBy: "birthValue",
+    orderBy: 'birthValue',
 
     nodeBinding: {
-      field_0: "name",
-      field_1: "dates",
-      field_2: "places",
-      field_3: "idLabel",
-      field_4: "maidenName",
+      field_0: 'name',
+      field_1: 'dates',
+      field_2: 'places',
+      field_3: 'idLabel',
+      field_4: 'maidenName',
     },
   });
 
-  family.on("click", function (sender, args) {
+  family.on('click', function (sender, args) {
     editPerson(args.node.id);
     return false;
   });
 
-  document.getElementById("plec").addEventListener("change", togglePanienskie);
-  document.getElementById("nieZyje").addEventListener("change", toggleZgon);
+  document.getElementById('plec').addEventListener('change', togglePanienskie);
+  document.getElementById('nieZyje').addEventListener('change', toggleZgon);
 
-  document
-    .getElementById("personForm")
-    .addEventListener("submit", function (e) {
-      e.preventDefault();
-      savePerson();
-    });
+  document.getElementById('personForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    savePerson();
+  });
 
   try {
-    const response = await fetch("/api/data", { cache: "no-store" });
+    const response = await fetch('/api/data', { cache: 'no-store' });
     if (response.ok) {
       klan = await response.json();
     }
   } catch (error) {
-    console.error("Brak połączenia z serwerem:", error);
+    console.error('Brak połączenia z serwerem:', error);
   }
 
   renderTree();
 }
 
 function togglePanienskie() {
-  const plec = document.getElementById("plec").value;
-  const polePanienskie = document.getElementById("nazwiskoPanienskie");
-  if (plec === "female") {
-    polePanienskie.classList.remove("hidden");
+  const plec = document.getElementById('plec').value;
+  const polePanienskie = document.getElementById('nazwiskoPanienskie');
+  if (plec === 'female') {
+    polePanienskie.classList.remove('hidden');
   } else {
-    polePanienskie.classList.add("hidden");
-    polePanienskie.value = "";
+    polePanienskie.classList.add('hidden');
+    polePanienskie.value = '';
   }
 }
 
 function toggleZgon() {
-  const isDead = document.getElementById("nieZyje").checked;
-  const sekcjaZgonu = document.getElementById("sekcjaZgonu");
+  const isDead = document.getElementById('nieZyje').checked;
+  const sekcjaZgonu = document.getElementById('sekcjaZgonu');
   if (isDead) {
-    sekcjaZgonu.classList.remove("hidden");
+    sekcjaZgonu.classList.remove('hidden');
   } else {
-    sekcjaZgonu.classList.add("hidden");
-    document.getElementById("dataZgonu").value = "";
-    document.getElementById("miejsceZgonu").value = "";
+    sekcjaZgonu.classList.add('hidden');
+    document.getElementById('dataZgonu').value = '';
+    document.getElementById('miejsceZgonu').value = '';
   }
 }
 
 // Funkcja przerabiająca datę "DD-MM-YYYY" na liczbę do sortowania (np. 19921129)
 function parseDateToNumber(dateStr) {
   if (!dateStr) return 99999999; // Brak daty zrzuca na prawy koniec rodzeństwa
-  const parts = dateStr.split("-");
+  const parts = dateStr.split('-');
   if (parts.length === 3) {
     return parseInt(parts[2] + parts[1] + parts[0], 10);
   }
@@ -126,18 +121,16 @@ function renderTree() {
   klan.forEach((osoba) => {
     const isDead = osoba.nieZyje || !!osoba.dataZgonu || !!osoba.miejsceZgonu;
 
-    const dUr = osoba.dataUrodzenia ? `ur. ${osoba.dataUrodzenia}` : "";
-    const dZg = isDead && osoba.dataZgonu ? `zg. ${osoba.dataZgonu}` : "";
-    const displayDates = [dUr, dZg].filter(Boolean).join(" - ");
+    const dUr = osoba.dataUrodzenia ? `ur. ${osoba.dataUrodzenia}` : '';
+    const dZg = isDead && osoba.dataZgonu ? `zg. ${osoba.dataZgonu}` : '';
+    const displayDates = [dUr, dZg].filter(Boolean).join(' - ');
 
-    const mUr = osoba.miejsceUrodzenia || "";
-    const mZg = isDead && osoba.miejsceZgonu ? `-> ${osoba.miejsceZgonu}` : "";
-    const displayPlaces = [mUr, mZg].filter(Boolean).join(" ");
+    const mUr = osoba.miejsceUrodzenia || '';
+    const mZg = isDead && osoba.miejsceZgonu ? `-> ${osoba.miejsceZgonu}` : '';
+    const displayPlaces = [mUr, mZg].filter(Boolean).join(' ');
 
     let glowneNazwisko = `${osoba.imie} ${osoba.nazwisko}`;
-    let panieńskieText = osoba.nazwiskoPanienskie
-      ? `(z d. ${osoba.nazwiskoPanienskie})`
-      : "";
+    let panieńskieText = osoba.nazwiskoPanienskie ? `(z d. ${osoba.nazwiskoPanienskie})` : '';
 
     let node = {
       id: String(osoba.id),
@@ -156,10 +149,7 @@ function renderTree() {
     if (osoba.matkaId && wszystkieIds.includes(String(osoba.matkaId)))
       node.mid = String(osoba.matkaId);
 
-    if (
-      osoba.wspolmalzonekId &&
-      wszystkieIds.includes(String(osoba.wspolmalzonekId))
-    ) {
+    if (osoba.wspolmalzonekId && wszystkieIds.includes(String(osoba.wspolmalzonekId))) {
       node.pids.push(String(osoba.wspolmalzonekId));
     }
 
@@ -195,8 +185,8 @@ function renderTree() {
   // OSTATECZNE SORTOWANIE (LEWO = MĄŻ, PRAWO = ŻONA)
   // Silnik układa graf w pamięci przed rysowaniem. Facet jako pierwszy gwarantuje, że to on jest główną lewą kotwicą.
   nodes.sort((a, b) => {
-    if (a.gender === "male" && b.gender === "female") return -1;
-    if (a.gender === "female" && b.gender === "male") return 1;
+    if (a.gender === 'male' && b.gender === 'female') return -1;
+    if (a.gender === 'female' && b.gender === 'male') return 1;
     return parseInt(a.id) - parseInt(b.id);
   });
 
@@ -204,49 +194,42 @@ function renderTree() {
 }
 
 async function savePerson() {
-  const idInput = document.getElementById("personId").value;
-  const isDead = document.getElementById("nieZyje").checked;
+  const idInput = document.getElementById('personId').value;
+  const isDead = document.getElementById('nieZyje').checked;
 
   const osoba = {
-    imie: document.getElementById("imie").value.trim(),
-    nazwisko: document.getElementById("nazwisko").value.trim(),
-    plec: document.getElementById("plec").value,
-    nazwiskoPanienskie: document
-      .getElementById("nazwiskoPanienskie")
-      .value.trim(),
-    dataUrodzenia: document.getElementById("dataUrodzenia").value.trim(),
-    miejsceUrodzenia: document.getElementById("miejsceUrodzenia").value.trim(),
+    imie: document.getElementById('imie').value.trim(),
+    nazwisko: document.getElementById('nazwisko').value.trim(),
+    plec: document.getElementById('plec').value,
+    nazwiskoPanienskie: document.getElementById('nazwiskoPanienskie').value.trim(),
+    dataUrodzenia: document.getElementById('dataUrodzenia').value.trim(),
+    miejsceUrodzenia: document.getElementById('miejsceUrodzenia').value.trim(),
     nieZyje: isDead,
-    dataZgonu: isDead ? document.getElementById("dataZgonu").value.trim() : "",
-    miejsceZgonu: isDead
-      ? document.getElementById("miejsceZgonu").value.trim()
-      : "",
-    ojciecId: document.getElementById("ojciecId").value.trim(),
-    matkaId: document.getElementById("matkaId").value.trim(),
-    wspolmalzonekId: document.getElementById("wspolmalzonekId").value.trim(),
+    dataZgonu: isDead ? document.getElementById('dataZgonu').value.trim() : '',
+    miejsceZgonu: isDead ? document.getElementById('miejsceZgonu').value.trim() : '',
+    ojciecId: document.getElementById('ojciecId').value.trim(),
+    matkaId: document.getElementById('matkaId').value.trim(),
+    wspolmalzonekId: document.getElementById('wspolmalzonekId').value.trim(),
   };
 
   if (idInput) {
     const index = klan.findIndex((o) => String(o.id) === String(idInput));
     if (index > -1) klan[index] = { ...klan[index], ...osoba };
   } else {
-    const highestId = klan.reduce(
-      (max, o) => Math.max(max, parseInt(o.id) || 0),
-      0,
-    );
+    const highestId = klan.reduce((max, o) => Math.max(max, parseInt(o.id) || 0), 0);
     const noweId = String(highestId + 1);
     klan.push({ id: noweId, ...osoba });
   }
 
   try {
-    const response = await fetch("/api/data", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(klan),
     });
 
     if (response.ok) {
-      const freshResponse = await fetch("/api/data", { cache: "no-store" });
+      const freshResponse = await fetch('/api/data', { cache: 'no-store' });
 
       if (freshResponse.ok) {
         klan = await freshResponse.json();
@@ -256,10 +239,10 @@ async function savePerson() {
         resetForm();
       }
     } else {
-      alert("Błąd: Serwer nie przyjął danych.");
+      alert('Błąd: Serwer nie przyjął danych.');
     }
   } catch (error) {
-    alert("Błąd połączenia z serwerem. Zapis się nie powiódł.");
+    alert('Błąd połączenia z serwerem. Zapis się nie powiódł.');
     console.error(error);
   }
 }
@@ -268,70 +251,54 @@ function editPerson(id) {
   const osoba = klan.find((o) => String(o.id) === String(id));
   if (!osoba) return;
 
-  document.getElementById("formTitle").innerText = "Tryb: Edycja osoby";
-  document
-    .getElementById("formTitle")
-    .classList.replace("text-gray-800", "text-red-600");
-  document.getElementById("visibleId").value = osoba.id;
-  document.getElementById("submitBtn").innerText = "Zapisz zmiany w osobie";
-  document
-    .getElementById("submitBtn")
-    .classList.replace("bg-blue-600", "bg-red-600");
-  document
-    .getElementById("submitBtn")
-    .classList.replace("hover:bg-blue-700", "hover:bg-red-700");
+  document.getElementById('formTitle').innerText = 'Tryb: Edycja osoby';
+  document.getElementById('formTitle').classList.replace('text-gray-800', 'text-red-600');
+  document.getElementById('visibleId').value = osoba.id;
+  document.getElementById('submitBtn').innerText = 'Zapisz zmiany w osobie';
+  document.getElementById('submitBtn').classList.replace('bg-blue-600', 'bg-red-600');
+  document.getElementById('submitBtn').classList.replace('hover:bg-blue-700', 'hover:bg-red-700');
 
-  document.getElementById("personId").value = osoba.id;
-  document.getElementById("imie").value = osoba.imie;
-  document.getElementById("nazwisko").value = osoba.nazwisko;
-  document.getElementById("plec").value = osoba.plec || "male";
-  document.getElementById("nazwiskoPanienskie").value =
-    osoba.nazwiskoPanienskie || "";
-  document.getElementById("dataUrodzenia").value = osoba.dataUrodzenia || "";
-  document.getElementById("miejsceUrodzenia").value =
-    osoba.miejsceUrodzenia || "";
+  document.getElementById('personId').value = osoba.id;
+  document.getElementById('imie').value = osoba.imie;
+  document.getElementById('nazwisko').value = osoba.nazwisko;
+  document.getElementById('plec').value = osoba.plec || 'male';
+  document.getElementById('nazwiskoPanienskie').value = osoba.nazwiskoPanienskie || '';
+  document.getElementById('dataUrodzenia').value = osoba.dataUrodzenia || '';
+  document.getElementById('miejsceUrodzenia').value = osoba.miejsceUrodzenia || '';
 
   const hasDeathRecords = !!osoba.dataZgonu || !!osoba.miejsceZgonu;
-  document.getElementById("nieZyje").checked = osoba.nieZyje || hasDeathRecords;
+  document.getElementById('nieZyje').checked = osoba.nieZyje || hasDeathRecords;
   toggleZgon();
-  document.getElementById("dataZgonu").value = osoba.dataZgonu || "";
-  document.getElementById("miejsceZgonu").value = osoba.miejsceZgonu || "";
+  document.getElementById('dataZgonu').value = osoba.dataZgonu || '';
+  document.getElementById('miejsceZgonu').value = osoba.miejsceZgonu || '';
 
-  document.getElementById("ojciecId").value = osoba.ojciecId || "";
-  document.getElementById("matkaId").value = osoba.matkaId || "";
-  document.getElementById("wspolmalzonekId").value =
-    osoba.wspolmalzonekId || "";
+  document.getElementById('ojciecId').value = osoba.ojciecId || '';
+  document.getElementById('matkaId').value = osoba.matkaId || '';
+  document.getElementById('wspolmalzonekId').value = osoba.wspolmalzonekId || '';
 
   togglePanienskie();
 }
 
 function resetForm() {
-  document.getElementById("personForm").reset();
+  document.getElementById('personForm').reset();
 
-  document.getElementById("formTitle").innerText =
-    "Tryb: Tworzenie nowej osoby";
-  document
-    .getElementById("formTitle")
-    .classList.replace("text-red-600", "text-gray-800");
-  document.getElementById("visibleId").value = "Zostanie nadane po zapisie";
-  document.getElementById("submitBtn").innerText = "Zapisz do drzewa";
-  document
-    .getElementById("submitBtn")
-    .classList.replace("bg-red-600", "bg-blue-600");
-  document
-    .getElementById("submitBtn")
-    .classList.replace("hover:bg-red-700", "hover:bg-blue-700");
+  document.getElementById('formTitle').innerText = 'Tryb: Tworzenie nowej osoby';
+  document.getElementById('formTitle').classList.replace('text-red-600', 'text-gray-800');
+  document.getElementById('visibleId').value = 'Zostanie nadane po zapisie';
+  document.getElementById('submitBtn').innerText = 'Zapisz do drzewa';
+  document.getElementById('submitBtn').classList.replace('bg-red-600', 'bg-blue-600');
+  document.getElementById('submitBtn').classList.replace('hover:bg-red-700', 'hover:bg-blue-700');
 
-  document.getElementById("personId").value = "";
-  document.getElementById("plec").value = "male";
+  document.getElementById('personId').value = '';
+  document.getElementById('plec').value = 'male';
 
   togglePanienskie();
-  document.getElementById("nieZyje").checked = false;
+  document.getElementById('nieZyje').checked = false;
   toggleZgon();
 }
 
 function exportData() {
-  window.open("/api/data", "_blank");
+  window.open('/api/data', '_blank');
 }
 
 window.onload = init;

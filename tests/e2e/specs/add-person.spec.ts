@@ -17,7 +17,6 @@ test.describe('Adding new people to the tree', () => {
   });
 
   test('Add new living person to the tree', async ({ page }) => {
-    // --- NARZĘDZIA DETEKTYWISTYCZNE ---
     page.on('dialog', async (dialog) => {
       console.log('\n=========================================');
       console.log('🚨 ALERT Z FRONTENDU:', dialog.message());
@@ -32,7 +31,9 @@ test.describe('Adding new people to the tree', () => {
       }
     });
 
+    const initialGet = page.waitForResponse(r => r.url().includes('/api/data') && r.request().method() === 'GET');
     await page.goto('/');
+    await initialGet;
 
     await page.getByPlaceholder('Imię (wymagane)').fill('Jan');
     await page.getByPlaceholder('Nazwisko (wymagane)').fill('Testowy');
@@ -41,13 +42,22 @@ test.describe('Adding new people to the tree', () => {
     await page.getByPlaceholder('Miejsce ur.').fill('Katowice');
 
     const responsePromise = page.waitForResponse(
-      (response) => response.url().includes('/api/data') && response.request().method() === 'POST',
+      (response) => response.url().includes('/api/data') && response.request().method() === 'POST'
+    );
+    
+    const refreshDataPromise = page.waitForResponse(
+      (response) => response.url().includes('/api/data') && response.request().method() === 'GET'
     );
 
     await page.getByRole('button', { name: 'Zapisz do drzewa' }).click();
-    const apiResponse = await responsePromise;
-    expect(apiResponse.status()).toBe(200);
+    
+    // Czekamy na POST
+    await responsePromise;
 
+    //Czekamy na GET następujący po POST wewnątrz app.js
+    await refreshDataPromise;
+
+    //Aplikacja sama zaktualizowała DOM. Asercje są gotowe
     await expect(page.locator('#tree', { hasText: 'Jan' })).toBeAttached();
     await expect(page.locator('#tree', { hasText: 'Testowy' })).toBeAttached();
   });

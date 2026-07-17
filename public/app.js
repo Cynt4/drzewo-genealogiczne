@@ -229,15 +229,8 @@ async function savePerson() {
     });
 
     if (response.ok) {
-      const freshResponse = await fetch('/api/data', { cache: 'no-store' });
-
-      if (freshResponse.ok) {
-        klan = await freshResponse.json();
-        // Musimy brutalnie czyścić stary wykres aby balkan.js miał pusty obraz
-        document.getElementById('tree').innerHTML = '';
-        renderTree();
-        resetForm();
-      }
+      // Najczystsze, kuloodporne rozwiązanie. Wymuszamy pobranie zaktualizowanego pliku JSON.
+      window.location.reload();
     } else {
       alert('Błąd: Serwer nie przyjął danych.');
     }

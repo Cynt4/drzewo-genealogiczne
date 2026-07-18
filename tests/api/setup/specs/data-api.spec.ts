@@ -66,9 +66,19 @@ test.describe('API: Zarządzanie strukturą danych drzewa', () => {
 
     const body = await response.json();
     expect(body.error).toBe('Unprocessable Entity');
-    expect(body.message).toContain(
-      "Każda osoba w drzewie musi posiadać wartość dla wymaganych pól 'imię' i 'nazwisko'.",
-    );
+    expect(body.message).toContain('Niepoprawny format danych.');
+  });
+
+  test('POST - reject invalid names (lowercase start or illegal chars)', async ({ request }) => {
+    const badData = [{ imie: 'jan', nazwisko: 'Kowalski' }];
+    const response = await request.post('/api/data', { data: badData });
+    expect(response.status()).toBe(422);
+  });
+
+  test('POST - reject invalid date format', async ({ request }) => {
+    const badData = [{ imie: 'Jan', nazwisko: 'Kowalski', dataUrodzenia: '2026-07-17' }];
+    const response = await request.post('/api/data', { data: badData });
+    expect(response.status()).toBe(422);
   });
 
   test('PUT - update existing person', async ({ request }) => {

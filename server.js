@@ -45,11 +45,10 @@ app.post('/api/data', (req, res) => {
 
   //Walidacja biznesowa
   for (const person of payload) {
-    if (!person.imie || !person.nazwisko) {
+    if (!person.imie || !person.nazwisko || !validatePerson(person)) {
       return res.status(422).json({
         error: 'Unprocessable Entity',
-        message:
-          "Każda osoba w drzewie musi posiadać wartość dla wymaganych pól 'imię' i 'nazwisko'.", // W tekście dla ludzi ogonki mogą być!
+        message: 'Niepoprawny format danych.',
       });
     }
   }
@@ -95,3 +94,22 @@ app.delete('/api/data/:id', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Serwer nasłuchuje na bazie danych: data/${TARGET_FILE}`);
 });
+
+function validatePerson(person) {
+  const nameRegex = /^[A-ZĆŁŃÓŚŹŻ][a-ząćęłńóśźż]*(?: [A-ZĆŁŃÓŚŹŻ][a-ząćęłńóśźż]*)*$/;
+  const dateRegex = /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[0-2])-\d{4}$/;
+  const digitRegex = /^\d*$/;
+
+  if (!person.imie || !nameRegex.test(person.imie)) return false;
+  if (!person.nazwisko || !nameRegex.test(person.nazwisko)) return false;
+
+  if (person.dataUrodzenia && !dateRegex.test(person.dataUrodzenia)) return false;
+  if (person.miejsceUrodzenia && !nameRegex.test(person.miejsceUrodzenia)) return false;
+  if (person.dataZgonu && !dateRegex.test(person.dataZgonu)) return false;
+  if (person.miejsceZgonu && !nameRegex.test(person.miejsceZgonu)) return false;
+  if (person.ojciecId && !digitRegex.test(person.ojciecId)) return false;
+  if (person.matkaId && !digitRegex.test(person.matkaId)) return false;
+  if (person.wspolmalzonekId && !digitRegex.test(person.wspolmalzonekId)) return false;
+  
+  return true;
+}

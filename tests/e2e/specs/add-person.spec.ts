@@ -31,7 +31,9 @@ test.describe('Adding new people to the tree', () => {
       }
     });
 
-    const initialGet = page.waitForResponse(r => r.url().includes('/api/data') && r.request().method() === 'GET');
+    const initialGet = page.waitForResponse(
+      (r) => r.url().includes('/api/data') && r.request().method() === 'GET',
+    );
     await page.goto('/');
     await initialGet;
 
@@ -42,23 +44,25 @@ test.describe('Adding new people to the tree', () => {
     await page.getByPlaceholder('Miejsce ur.').fill('Katowice');
 
     const responsePromise = page.waitForResponse(
-      (response) => response.url().includes('/api/data') && response.request().method() === 'POST'
+      (response) => response.url().includes('/api/data') && response.request().method() === 'POST',
     );
-    
+
     const refreshDataPromise = page.waitForResponse(
-      (response) => response.url().includes('/api/data') && response.request().method() === 'GET'
+      (response) => response.url().includes('/api/data') && response.request().method() === 'GET',
     );
 
     await page.getByRole('button', { name: 'Zapisz do drzewa' }).click();
-    
+
     // Czekamy na POST
     await responsePromise;
 
-    //Czekamy na GET następujący po POST wewnątrz app.js
+    // Czekamy na GET następujący po POST wewnątrz app.js
     await refreshDataPromise;
 
-    //Aplikacja sama zaktualizowała DOM. Asercje są gotowe
-    await expect(page.locator('#tree', { hasText: 'Jan' })).toBeAttached();
-    await expect(page.locator('#tree', { hasText: 'Testowy' })).toBeAttached();
+    await expect(async () => {
+      const content = await page.locator('#tree').textContent();
+      expect(content).toContain('Jan');
+      expect(content).toContain('Testowy');
+    }).toPass({ timeout: 10000 });
   });
 });

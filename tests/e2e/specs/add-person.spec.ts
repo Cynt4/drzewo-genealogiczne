@@ -43,26 +43,37 @@ test.describe('Adding new people to the tree', () => {
     await page.getByPlaceholder('Data ur. (DD-MM-RRRR)').fill('01-01-1990');
     await page.getByPlaceholder('Miejsce ur.').fill('Katowice');
 
+    // --- 1. DEKLARACJA OBIETNIC SIECIOWYCH (PRZED KLIKNIĘCIEM) ---
+
+    // Obietnica dla requestu POST (zapis danych)
     const responsePromise = page.waitForResponse(
       (response) => response.url().includes('/api/data') && response.request().method() === 'POST',
     );
 
-    const refreshDataPromise = page.waitForResponse(
+    // Obietnica dla requestu GET (pobranie danych po przeładowaniu)
+    const postReloadGetPromise = page.waitForResponse(
       (response) => response.url().includes('/api/data') && response.request().method() === 'GET',
     );
 
+    // --- 2. WYZWOLENIE AKCJI ---
     await page.getByRole('button', { name: 'Zapisz do drzewa' }).click();
 
-    // Czekamy na POST
+    // --- 3. SYNCHRONIZACJA SIECIOWA ---
+    // Czekamy, aż serwer przyjmie dane
     await responsePromise;
+    // Czekamy, aż aplikacja się przeładuje i pobierze nowe dane
+    await postReloadGetPromise;
 
-    // Czekamy na GET następujący po POST wewnątrz app.js
-    await refreshDataPromise;
+    // --- 4. KULOOPORNA SYNCHRONIZACJA DOM I ASERCJA SVG ---
+    // Szukamy specyficznego elementu wektorowego <text> wg atrybutu z szablonu Balkan.js
+    const targetSvgNode = page.locator('#tree svg text[text-anchor="middle"]', {
+      hasText: 'Jan Testowy',
+    });
 
-    await expect(async () => {
-      const content = await page.locator('#tree').textContent();
-      expect(content).toContain('Jan');
-      expect(content).toContain('Testowy');
-    }).toPass({ timeout: 10000 });
+    // Czekamy aż silnik JS wstrzyknie ramkę z tym tekstem do DOM (ignorując tryb strict i ukryte CSS)
+    await targetSvgNode.first().waitFor({ state: 'attached', timeout: 10000 });
+
+    // Ostateczna asercja Playwright
+    await expect(targetSvgNode.first()).toBeAttached();
   });
 });

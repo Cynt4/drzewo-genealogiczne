@@ -33,28 +33,34 @@ app.get('/api/data', (req, res) => {
 
 // POST DATA
 app.post('/api/data', (req, res) => {
-  const payload = req.body;
+  const newPerson = req.body;
 
-  //Walidacja architektury
-  if (!payload || !Array.isArray(payload)) {
+  if (!newPerson || Array.isArray(newPerson) || typeof newPerson !== 'object') {
     return res.status(400).json({
       error: 'Bad request',
-      message: 'Przesłane dane muszą być tablicą obiektów reprezentujących osoby.',
+      message: 'Przesłane dane muszą być pojedynczym obiektem reprezentującym osobę.',
     });
   }
 
-  //Walidacja biznesowa
-  for (const person of payload) {
-    if (!person.imie || !person.nazwisko || !validatePerson(person)) {
-      return res.status(422).json({
-        error: 'Unprocessable Entity',
-        message: 'Niepoprawny format danych.',
-      });
-    }
+  if (!newPerson.imie || !newPerson.nazwisko || !validatePerson(newPerson)) {
+    return res.status(422).json({
+      error: 'Unprocessable Entity',
+      message: 'Niepoprawny format danych osoby.',
+    });
   }
+
   try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(req.body, null, 2));
-    res.json({ success: true, message: 'Zapisano poprawnie' });
+    const currentData = fs.existsSync(DATA_FILE)
+      ? JSON.parse(fs.readFileSync(DATA_FILE, 'utf8') || '[]')
+      : [];
+
+    const highestId = currentData.reduce((max, o) => Math.max(max, parseInt(o.id) || 0), 0);
+    newPerson.id = String(highestId + 1);
+
+    currentData.push(newPerson);
+    fs.writeFileSync(DATA_FILE, JSON.stringify(currentData, null, 2));
+
+    res.status(201).json({ success: true, message: 'Zapisano poprawnie', data: newPerson });
   } catch (err) {
     res.status(500).json({ error: 'Błąd zapisu na serwerze' });
   }
@@ -110,6 +116,6 @@ function validatePerson(person) {
   if (person.ojciecId && !digitRegex.test(person.ojciecId)) return false;
   if (person.matkaId && !digitRegex.test(person.matkaId)) return false;
   if (person.wspolmalzonekId && !digitRegex.test(person.wspolmalzonekId)) return false;
-  
+
   return true;
 }

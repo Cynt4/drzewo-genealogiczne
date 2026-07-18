@@ -212,27 +212,26 @@ async function savePerson() {
     wspolmalzonekId: document.getElementById('wspolmalzonekId').value.trim(),
   };
 
+  let url = '/api/data';
+  let method = 'POST';
+
   if (idInput) {
-    const index = klan.findIndex((o) => String(o.id) === String(idInput));
-    if (index > -1) klan[index] = { ...klan[index], ...osoba };
-  } else {
-    const highestId = klan.reduce((max, o) => Math.max(max, parseInt(o.id) || 0), 0);
-    const noweId = String(highestId + 1);
-    klan.push({ id: noweId, ...osoba });
+    url = `/api/data/${idInput}`;
+    method = 'PUT';
   }
 
   try {
-    const response = await fetch('/api/data', {
-      method: 'POST',
+    const response = await fetch(url, {
+      method: method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(klan),
+      body: JSON.stringify(osoba),
     });
 
     if (response.ok) {
-      // Najczystsze, kuloodporne rozwiązanie. Wymuszamy pobranie zaktualizowanego pliku JSON.
       window.location.reload();
     } else {
-      alert('Błąd: Serwer nie przyjął danych.');
+      const errData = await response.json();
+      alert(`Błąd: ${errData.message || 'Serwer nie przyjął danych.'}`);
     }
   } catch (error) {
     alert('Błąd połączenia z serwerem. Zapis się nie powiódł.');

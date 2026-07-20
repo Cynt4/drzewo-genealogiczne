@@ -1,12 +1,12 @@
 let klan = [];
 let family = null;
 
-// --- DEFINICJA WŁASNYCH RAMEK ---
 FamilyTree.templates.ramka = Object.assign({}, FamilyTree.templates.base);
 FamilyTree.templates.ramka.size = [260, 115];
 
 FamilyTree.templates.ramka.field_0 =
-  '<text data-text-overflow="ellipsis" width="240" style="font-size: 14px; font-weight: bold;" fill="#1e293b" x="130" y="25" text-anchor="middle">{val}</text>';
+  '<text data-test-name="{val}" data-text-overflow="ellipsis" width="240" style="font-size: 14px; font-weight: bold;" fill="#1e293b" x="130" y="25" text-anchor="middle">{val}</text>';
+
 FamilyTree.templates.ramka.field_4 =
   '<text data-text-overflow="ellipsis" width="240" style="font-size: 11px; font-style: italic;" fill="#64748b" x="130" y="45" text-anchor="middle">{val}</text>';
 FamilyTree.templates.ramka.field_1 =
@@ -30,8 +30,6 @@ async function init() {
     template: 'ramka',
     enableSearch: false,
 
-    // Zmiana sterowania: Kółko przesuwa (pan), Ctrl+Kółko przybliża (zoom).
-    // Rozwiązuje problem uciekającego i skaczącego ekranu.
     mouseScrool: FamilyTree.action.ctrlZoom,
 
     editForm: { readOnly: true },
@@ -39,7 +37,6 @@ async function init() {
     subtreeSeparation: 80,
     levelSeparation: 90,
 
-    // Wymuszenie sortowania dzieci (od lewej do prawej) wg naszej zmiennej
     orderBy: 'birthValue',
 
     nodeBinding: {
@@ -99,9 +96,8 @@ function toggleZgon() {
   }
 }
 
-// Funkcja przerabiająca datę "DD-MM-YYYY" na liczbę do sortowania (np. 19921129)
 function parseDateToNumber(dateStr) {
-  if (!dateStr) return 99999999; // Brak daty zrzuca na prawy koniec rodzeństwa
+  if (!dateStr) return 99999999; 
   const parts = dateStr.split('-');
   if (parts.length === 3) {
     return parseInt(parts[2] + parts[1] + parts[0], 10);
@@ -140,7 +136,7 @@ function renderTree() {
       gender: osoba.plec,
       dates: displayDates,
       places: displayPlaces,
-      birthValue: parseDateToNumber(osoba.dataUrodzenia), // Silnik użyje tego do ułożenia dzieci od lewej do prawej
+      birthValue: parseDateToNumber(osoba.dataUrodzenia), 
       pids: [],
     };
 
@@ -156,7 +152,6 @@ function renderTree() {
     nodes.push(node);
   });
 
-  // Uzupełnienie więzi partnerskich w obie strony
   nodes.forEach((node) => {
     if (node.pids.length > 0) {
       node.pids.forEach((partnerId) => {
@@ -182,8 +177,6 @@ function renderTree() {
     node.pids = [...new Set(node.pids)];
   });
 
-  // OSTATECZNE SORTOWANIE (LEWO = MĄŻ, PRAWO = ŻONA)
-  // Silnik układa graf w pamięci przed rysowaniem. Facet jako pierwszy gwarantuje, że to on jest główną lewą kotwicą.
   nodes.sort((a, b) => {
     if (a.gender === 'male' && b.gender === 'female') return -1;
     if (a.gender === 'female' && b.gender === 'male') return 1;
@@ -249,6 +242,7 @@ function editPerson(id) {
   document.getElementById('submitBtn').innerText = 'Zapisz zmiany w osobie';
   document.getElementById('submitBtn').classList.replace('bg-blue-600', 'bg-red-600');
   document.getElementById('submitBtn').classList.replace('hover:bg-blue-700', 'hover:bg-red-700');
+  document.getElementById('deleteBtn').classList.remove('hidden');
 
   document.getElementById('personId').value = osoba.id;
   document.getElementById('imie').value = osoba.imie;
@@ -280,6 +274,7 @@ function resetForm() {
   document.getElementById('submitBtn').innerText = 'Zapisz do drzewa';
   document.getElementById('submitBtn').classList.replace('bg-red-600', 'bg-blue-600');
   document.getElementById('submitBtn').classList.replace('hover:bg-red-700', 'hover:bg-blue-700');
+  document.getElementById('deleteBtn').classList.add('hidden');
 
   document.getElementById('personId').value = '';
   document.getElementById('plec').value = 'male';
@@ -291,6 +286,31 @@ function resetForm() {
 
 function exportData() {
   window.open('/api/data', '_blank');
+}
+
+async function deletePerson() {
+  const idInput = document.getElementById('personId').value;
+  if (!idInput) return;
+
+  if (!confirm('Czy na pewno chcesz usunąć tę osobę? Ta operacja jest nieodwracalna.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/data/${idInput}`, {
+      method: 'DELETE',
+    });
+
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      const errData = await response.json();
+      alert(`Błąd: ${errData.error || 'Nie udało się usunąć osoby.'}`);
+    }
+  } catch (error) {
+    alert('Błąd połączenia z serwerem. Usunięcie nie powiodło się.');
+    console.error(error);
+  }
 }
 
 window.onload = init;

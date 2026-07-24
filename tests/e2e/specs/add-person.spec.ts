@@ -37,13 +37,10 @@ test.describe('Adding new people to the tree', () => {
     await page.getByPlaceholder('Data ur. (DD-MM-RRRR)').fill('01-01-1990');
     await page.getByPlaceholder('Miejsce ur.').fill('Katowice');
 
-    await Promise.all([
-      page.waitForNavigation(),
-      page.getByRole('button', { name: 'Zapisz do drzewa' }).click()
-    ]);
+    await page.getByRole('button', { name: 'Zapisz do drzewa' }).click();
 
-    const targetSvgNode = page.locator('text[data-test-name="Jan Testowy"]');
-    
+    const targetSvgNode = page.getByText('Jan Testowy', { exact: true });
+
     await targetSvgNode.waitFor({ state: 'attached', timeout: 10000 });
     await expect(targetSvgNode).toBeAttached();
   });

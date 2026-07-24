@@ -5,7 +5,7 @@ FamilyTree.templates.ramka = Object.assign({}, FamilyTree.templates.base);
 FamilyTree.templates.ramka.size = [260, 115];
 
 FamilyTree.templates.ramka.field_0 =
-  '<text data-test-name="{val}" data-text-overflow="ellipsis" width="240" style="font-size: 14px; font-weight: bold;" fill="#1e293b" x="130" y="25" text-anchor="middle">{val}</text>';
+  '<text data-text-overflow="ellipsis" width="240" style="font-size: 14px; font-weight: bold;" fill="#1e293b" x="130" y="25" text-anchor="middle">{val}</text>';
 
 FamilyTree.templates.ramka.field_4 =
   '<text data-text-overflow="ellipsis" width="240" style="font-size: 11px; font-style: italic;" fill="#64748b" x="130" y="45" text-anchor="middle">{val}</text>';
@@ -97,7 +97,7 @@ function toggleZgon() {
 }
 
 function parseDateToNumber(dateStr) {
-  if (!dateStr) return 99999999; 
+  if (!dateStr) return 99999999;
   const parts = dateStr.split('-');
   if (parts.length === 3) {
     return parseInt(parts[2] + parts[1] + parts[0], 10);
@@ -136,7 +136,7 @@ function renderTree() {
       gender: osoba.plec,
       dates: displayDates,
       places: displayPlaces,
-      birthValue: parseDateToNumber(osoba.dataUrodzenia), 
+      birthValue: parseDateToNumber(osoba.dataUrodzenia),
       pids: [],
     };
 

@@ -18,16 +18,17 @@ test.describe('Edit and Delete operations (Update & Delete)', () => {
 
   test('Edit an existing person and then delete them', async ({ page, request }) => {
     const createResp = await request.post('/api/data', {
-      data: { imie: 'Adam', nazwisko: 'Kowal', plec: 'male', miejsceUrodzenia: 'Katowice' }
+      data: { imie: 'Adam', nazwisko: 'Kowal', plec: 'male', miejsceUrodzenia: 'Katowice' },
     });
     expect(createResp.status()).toBe(201);
 
-    const initialGet = page.waitForResponse(r => r.url().includes('/api/data') && r.request().method() === 'GET');
+    const initialGet = page.waitForResponse(
+      (r) => r.url().includes('/api/data') && r.request().method() === 'GET',
+    );
     await page.goto('/');
     await initialGet;
 
-    // Lokator po nowym atrybucie data-test-name
-    const targetSvgNode = page.locator('text[data-test-name="Adam Kowal"]');
+    const targetSvgNode = page.getByText('Adam Kowal', { exact: true });
     await targetSvgNode.waitFor({ state: 'attached', timeout: 10000 });
     await targetSvgNode.click();
 
@@ -35,11 +36,11 @@ test.describe('Edit and Delete operations (Update & Delete)', () => {
     await page.getByPlaceholder('Nazwisko (wymagane)').fill('Nowy');
 
     await Promise.all([
-      page.waitForNavigation(),
-      page.getByRole('button', { name: 'Zapisz zmiany w osobie' }).click()
+      page.waitForURL('**/'), // Oczekujemy ponownego załadowania strony głównej po location.reload()
+      page.getByRole('button', { name: 'Zapisz zmiany w osobie' }).click(),
     ]);
 
-    const updatedSvgNode = page.locator('text[data-test-name="Adam Nowy"]');
+    const updatedSvgNode = page.getByText('Adam Nowy', { exact: true });
     await updatedSvgNode.waitFor({ state: 'attached', timeout: 10000 });
     await updatedSvgNode.click();
 
@@ -49,8 +50,8 @@ test.describe('Edit and Delete operations (Update & Delete)', () => {
     });
 
     await Promise.all([
-      page.waitForNavigation(),
-      page.getByRole('button', { name: 'Usuń osobę z drzewa' }).click()
+      page.waitForURL('**/'),
+      page.getByRole('button', { name: 'Usuń osobę z drzewa' }).click(),
     ]);
 
     await expect(updatedSvgNode).toBeHidden({ timeout: 10000 });
